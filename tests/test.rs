@@ -34,8 +34,8 @@ use std::marker::PhantomData;
 use std::str::FromStr;
 use std::string::ToString;
 use std::{f32, f64};
-use std::{i16, i32, i64, i8};
-use std::{u16, u32, u64, u8};
+use std::{i128, i16, i32, i64, i8};
+use std::{u128, u16, u32, u64, u8};
 
 use serde::de::{self, Deserialize, IgnoredAny};
 use serde::ser::{self, Serialize, Serializer};
@@ -578,7 +578,7 @@ fn test_deserialize_number_to_untagged_enum() {
     #[derive(Eq, PartialEq, Deserialize, Debug)]
     #[serde(untagged)]
     enum E {
-        N(i64),
+        N(i128),
     }
 
     assert_eq!(E::N(0), E::deserialize(Number::from(0)).unwrap());
@@ -797,23 +797,26 @@ fn test_parse_number_errors() {
 }
 
 #[test]
-fn test_parse_i64() {
+fn test_parse_i128() {
     test_parse_ok(vec![
-        ("-2", -2),
-        ("-1234", -1234),
-        (" -1234 ", -1234),
-        (&i64::MIN.to_string(), i64::MIN),
-        (&i64::MAX.to_string(), i64::MAX),
+        ("-2", -2_i128),
+        ("-1234", -1234_i128),
+        (" -1234 ", -1234_i128),
+        (&i64::MIN.to_string(), i128::from(i64::MIN)),
+        (&i64::MAX.to_string(), i128::from(i64::MAX)),
+        (&i128::MIN.to_string(), i128::MIN),
+        (&i128::MAX.to_string(), i128::MAX),
     ]);
 }
 
 #[test]
-fn test_parse_u64() {
+fn test_parse_u128() {
     test_parse_ok(vec![
-        ("0", 0u64),
-        ("3", 3u64),
+        ("0", 0_u128),
+        ("3", 3_u128),
         ("1234", 1234),
-        (&u64::MAX.to_string(), u64::MAX),
+        (&u64::MAX.to_string(), u128::from(u64::MAX)),
+        (&u128::MAX.to_string(), u128::MAX),
     ]);
 }
 
