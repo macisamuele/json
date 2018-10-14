@@ -611,6 +611,36 @@ impl Value {
         }
     }
 
+    /// Returns true if the `Value` is an integer between `i128::MIN` and
+    /// `i128::MAX`.
+    ///
+    /// For any Value on which `is_i128` returns true, `as_i128` is guaranteed to
+    /// return the integer value.
+    ///
+    /// ```rust
+    /// # #[macro_use]
+    /// # extern crate serde_json;
+    /// #
+    /// # fn main() {
+    /// let big = i128::max_value() as u128 + 10;
+    /// let v = json!({ "a": 128, "b": big, "c": 256.0 });
+    ///
+    /// assert!(v["a"].is_i128());
+    ///
+    /// // Greater than i128::MAX.
+    /// assert!(!v["b"].is_i128());
+    ///
+    /// // Numbers with a decimal point are not considered integers.
+    /// assert!(!v["c"].is_i128());
+    /// # }
+    /// ```
+    pub fn is_i128(&self) -> bool {
+        match *self {
+            Value::Number(ref n) => n.is_i128(),
+            _ => false,
+        }
+    }
+
     /// Returns true if the `Value` is an integer between zero and `u64::MAX`.
     ///
     /// For any Value on which `is_u64` returns true, `as_u64` is guaranteed to
@@ -635,6 +665,34 @@ impl Value {
     pub fn is_u64(&self) -> bool {
         match *self {
             Value::Number(ref n) => n.is_u64(),
+            _ => false,
+        }
+    }
+
+    /// Returns true if the `Value` is an integer between zero and `u128::MAX`.
+    ///
+    /// For any Value on which `is_u128` returns true, `as_u128` is guaranteed to
+    /// return the integer value.
+    ///
+    /// ```rust
+    /// # #[macro_use]
+    /// # extern crate serde_json;
+    /// #
+    /// # fn main() {
+    /// let v = json!({ "a": 128, "b": -128, "c": 256.0 });
+    ///
+    /// assert!(v["a"].is_u128());
+    ///
+    /// // Negative integer.
+    /// assert!(!v["b"].is_u128());
+    ///
+    /// // Numbers with a decimal point are not considered integers.
+    /// assert!(!v["c"].is_u128());
+    /// # }
+    /// ```
+    pub fn is_u128(&self) -> bool {
+        match *self {
+            Value::Number(ref n) => n.is_u128(),
             _ => false,
         }
     }
@@ -691,6 +749,29 @@ impl Value {
         }
     }
 
+    /// If the `Value` is an integer, represent it as i64 if possible. Returns
+    /// None otherwise.
+    ///
+    /// ```rust
+    /// # #[macro_use]
+    /// # extern crate serde_json;
+    /// #
+    /// # fn main() {
+    /// let big = i128::max_value() as u128 + 10;
+    /// let v = json!({ "a": 64, "b": big, "c": 256.0 });
+    ///
+    /// assert_eq!(v["a"].as_i128(), Some(64));
+    /// assert_eq!(v["b"].as_i128(), None);
+    /// assert_eq!(v["c"].as_i128(), None);
+    /// # }
+    /// ```
+    pub fn as_i128(&self) -> Option<i128> {
+        match *self {
+            Value::Number(ref n) => n.as_i128(),
+            _ => None,
+        }
+    }
+
     /// If the `Value` is an integer, represent it as u64 if possible. Returns
     /// None otherwise.
     ///
@@ -709,6 +790,28 @@ impl Value {
     pub fn as_u64(&self) -> Option<u64> {
         match *self {
             Value::Number(ref n) => n.as_u64(),
+            _ => None,
+        }
+    }
+
+    /// If the `Value` is an integer, represent it as u128 if possible. Returns
+    /// None otherwise.
+    ///
+    /// ```rust
+    /// # #[macro_use]
+    /// # extern crate serde_json;
+    /// #
+    /// # fn main() {
+    /// let v = json!({ "a": 64, "b": -64, "c": 256.0 });
+    ///
+    /// assert_eq!(v["a"].as_u128(), Some(64));
+    /// assert_eq!(v["b"].as_u128(), None);
+    /// assert_eq!(v["c"].as_u128(), None);
+    /// # }
+    /// ```
+    pub fn as_u128(&self) -> Option<u128> {
+        match *self {
+            Value::Number(ref n) => n.as_u128(),
             _ => None,
         }
     }
